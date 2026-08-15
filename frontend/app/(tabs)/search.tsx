@@ -44,6 +44,7 @@ export default function SearchScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [savedMap, setSavedMap] = useState<Record<string, string>>({});
   const seeded = useRef(false);
+  const syncedLive = useRef(false);
 
   const loadJobs = useCallback(
     async (f: JobFilters) => {
@@ -86,6 +87,16 @@ export default function SearchScreen() {
   useFocusEffect(
     useCallback(() => {
       loadJobs(filters);
+      // one-time background sync of live listings (Remotive), then silent reload
+      if (!syncedLive.current) {
+        syncedLive.current = true;
+        api
+          .syncJobs()
+          .then((r) => {
+            if (r.synced > 0) loadJobs(filters);
+          })
+          .catch(() => {});
+      }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []),
   );
@@ -99,7 +110,10 @@ export default function SearchScreen() {
 
   const onSubmitSearch = () => {
     const f = { ...filters, q: searchText.trim() || undefined };
-    applyFilters(f);
+    setFilters(f);
+    setLoading(true);
+    // pull matching live listings first, then show results
+    (f.q ? api.syncJobs(f.q).catch(() => {}) : Promise.resolve()).then(() => loadJobs(f));
   };
 
   const toggleQuick = (patch: JobFilters) => {
@@ -234,7 +248,16 @@ export default function SearchScreen() {
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
-              onRefresh={() => { setRefreshing(true); loadJobs(filters); loadSaved(); }}
+              onRefresh={() => {
+                setRefreshing(true);
+                api
+                  .syncJobs(filters.q)
+                  .catch(() => {})
+                  .then(() => {
+                    loadJobs(filters);
+                    loadSaved();
+                  });
+              }}
               tintColor={colors.brandPrimary}
             />
           }

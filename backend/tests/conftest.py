@@ -19,8 +19,9 @@ if not BASE_URL:
 
 API = f"{BASE_URL}/api"
 
-TEST_USER_EMAIL = "tester@moneyseeker.dev"
-TEST_USER_PASSWORD = "Test@1234"
+# Phase 3-5 test account (from /app/memory/test_credentials.md)
+TEST_USER_EMAIL = "tester@moneyseeker.app"
+TEST_USER_PASSWORD = "Test1234!"
 
 
 @pytest.fixture(scope="session")

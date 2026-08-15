@@ -50,11 +50,29 @@ Delivered in phases:
   job search (search bar, quick pills, filter bottom sheet, results list), job detail (Save/Apply, sticky glass CTA),
   functional tracker (status-segmented), resumes (add/list/default/delete), profile (stats + logout).
   Design system: Geist font, warm sand + sage green, testIDs everywhere. All tests green (backend 19/19, frontend 17/17).
+- [x] P3 (2026-06): Kanban tracker — horizontally scrollable columns (Saved→Rejected), long-press drag-and-drop
+  between columns (reanimated ghost card, edge auto-scroll, target column highlight), tap card → ApplicationSheet
+  bottom sheet with stage chips, follow-up reminder quick-picks (tomorrow/3d/1w/2w + clear), notes add/delete,
+  remove from tracker. PATCH /applications now uses exclude_unset so follow_up_date can be cleared with null.
+- [x] P4 (2026-06): Live jobs — Remotive free API (no key). POST /api/jobs/sync?q= fetches, maps to Job model
+  (salary parsing, experience inference from title, HTML-stripped description), dedupes by external_id,
+  source="remotive". Search screen syncs on first load, pull-to-refresh, and search submit; LIVE pill on job cards.
+  NOTE: user originally wanted Apify but had no token; chose free alternative.
+- [x] P5 (2026-06): AI extras via Emergent LLM key + claude-sonnet-5 (emergentintegrations).
+  POST /api/ai/match {job_id, resume_id?} → {score 0-100, summary, strengths[], gaps[]};
+  POST /api/ai/cover-letter → {cover_letter}. Uses default resume if resume_id omitted; 400 if no resume.
+  Frontend: "AI Assistant" section on job detail (AiTools.tsx) — resume selector chips, match score ring,
+  strengths/gaps lists, cover letter with copy (expo-clipboard).
+
+## Testing
+- 2026-06: testing_agent iteration_2 — backend 12/12 passed (sync idempotency, reminder set/clear, notes, AI match/letter),
+  all frontend flows verified on mobile viewport. Backend test suite: /app/backend/tests/test_phase345.py
+- Known non-blocking: react-native-web deprecation warnings; clearbit logos blocked in sandbox.
+  BottomSheetTextInput web incompatibility fixed by using plain TextInput on web.
 
 ## Backlog
-- P3 (next): Kanban tracker upgrade — drag cards between columns, add notes UI, follow-up reminder date picker per application
-- P4: Apify job-scraper integration (user provides Apify token) + map response → Job model
-- P5: AI resume match score (0-100 + gaps) + tailored cover letter generation (Claude Sonnet 5 / GPT-5.4)
+- (none — all 5 phases complete). Ideas: reminder push notifications on follow-up dates (needs native build),
+  Apify integration if user later provides a token, resume file upload (PDF parse) via object storage.
 
 ## Test Accounts
 See /app/memory/test_credentials.md

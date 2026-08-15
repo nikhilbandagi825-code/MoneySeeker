@@ -8,6 +8,7 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from "react-n
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { api, Application, Job } from "@/src/api/client";
+import { AiTools } from "@/src/components/AiTools";
 import { CompanyLogo } from "@/src/components/CompanyLogo";
 import { Button, Skeleton, useToast } from "@/src/components/ui";
 import { colors, EXPERIENCE_LABEL, fonts, fontSize, radius, REMOTE_LABEL, spacing, formatSalary } from "@/src/theme";
@@ -137,6 +138,8 @@ export default function JobDetail() {
               <Text style={styles.sectionTitle}>About the role</Text>
               <Text style={styles.description}>{job.description}</Text>
             </View>
+
+            <AiTools jobId={job.job_id} />
 
             {app && (
               <View style={styles.statusBanner} testID="status-banner">

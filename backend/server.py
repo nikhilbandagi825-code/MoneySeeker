@@ -5,6 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from auth import auth_router
 from db import client, ensure_indexes
+from routes_ai import ai_router
 from routes_applications import applications_router
 from routes_jobs import jobs_router
 from routes_resumes import resumes_router
@@ -40,6 +41,7 @@ app.include_router(auth_router)
 app.include_router(jobs_router)
 app.include_router(resumes_router)
 app.include_router(applications_router)
+app.include_router(ai_router)
 
 
 @app.on_event("startup")

@@ -1,0 +1,63 @@
+{
+  "summary": "Phase 3-5 tested end-to-end (backend + frontend). Backend: 12/12 pytest cases passed on /jobs/sync (initial + idempotent + query + source flag), applications (status patch, follow_up_date set + null-clear persistence, notes add/delete), AI (/ai/match with score+summary+strengths+gaps, /ai/match 404 for bad job, /ai/cover-letter returns 1500+ char letter, /ai/match returns 400 for a user with no resume). Frontend: full mobile flow verified on the public Expo web preview — login (Continue), Tracker kanban board with all 5 columns (Saved/Applied/Interviewing/Offer/Rejected), tapping tracker-card opens bottom sheet, stage-chip change moves card to new column (verified Interviewing count → 1), reminder set + clear, notes add + delete, Search tab shows 25 jobs with LIVE pills, searching 'developer' triggers live sync + filters to 4 jobs (3 LIVE), job detail shows ai-tools with working ai-match-button (result rendered) and ai-letter-button (1590-char letter + copy button). Drag-and-drop not attempted (gesture-based, best-effort per request; stage-chip fallback verified). One dev-overlay uncaught error surfaced from @gorhom/bottom-sheet BottomSheetTextInput on web, but the note operation itself succeeds — non-blocking. React-Native-web deprecation warnings (pointerEvents, shadow*, React 19 element.ref) persist from prior iterations.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "search + tracker + job detail",
+        "issues": [
+          "Company logo URLs (logo.clearbit.com/<domain>) still fail inside the preview sandbox (ERR_NAME_NOT_RESOLVED). UI degrades gracefully to empty avatar tile. Non-blocking but hurts polish. Consider colored-initials fallback or bundled placeholder."
+        ]
+      }
+    ],
+    "react_native_issues": [
+      {
+        "component": "@gorhom/bottom-sheet BottomSheetTextInput (web)",
+        "issue": "Adding a note via sheet-note-input triggers an uncaught 'RNTextInput.default.State.currentlyFocusedInput is not a function' error (visible as a dev red-box on web). The note itself is added and persisted successfully — this is a react-native-web ↔ @gorhom/bottom-sheet compatibility issue on web builds only, not native. Reference: /app/frontend/src/components/ApplicationSheet.tsx (BottomSheetTextInput usage around line 204) and node_modules/@gorhom/bottom-sheet/lib/module/components/bottomSheetTextInput/BottomSheetTextInput.js:37."
+      },
+      {
+        "component": "@gorhom/bottom-sheet + reanimated",
+        "issue": "'Accessing element.ref was removed in React 19. ref is now a regular prop.' warnings still surface when opening the ApplicationSheet/FilterSheet. Non-blocking (carry-over from Phase 2 report)."
+      },
+      {
+        "component": "react-native-web deprecations",
+        "issue": "'props.pointerEvents is deprecated' and '\"shadow*\" style props are deprecated. Use \"boxShadow\"' warnings persist (upstream RN-web / dependency). Non-blocking."
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_phase345.py",
+    "/app/backend/tests/test_moneyseeker_api.py",
+    "/app/backend/tests/conftest.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "(Optional, non-blocking) On web, wrap the ApplicationSheet note input with a plain <TextInput> instead of <BottomSheetTextInput>, OR guard the offending handler in @gorhom/bottom-sheet's BottomSheetTextInput to avoid the 'RNTextInput.default.State.currentlyFocusedInput is not a function' error being visible in dev on web. The functionality already works — this is purely to remove the red-box in dev builds on web.",
+    "(Optional polish, carry-over) Add a colored-initials avatar fallback when company_logo fails to load — the sandbox cannot resolve logo.clearbit.com and this spams console errors."
+  ],
+  "critical_code_review_comments": [
+    "routes_ai.py: EMERGENT_LLM_KEY loaded once at import via load_dotenv from backend/.env — good, no hardcoding. Model pinned to claude-sonnet-5.",
+    "routes_applications.py PATCH uses payload.model_dump(exclude_unset=True) so clients can explicitly clear follow_up_date to null — verified via test.",
+    "routes_jobs.py /sync dedupes by (source='remotive', external_id) — verified idempotent via test (second sync returns synced=0).",
+    "All routes still project out MongoDB _id everywhere — no leakage in any tested endpoint.",
+    "AiTools.tsx correctly gates Match/Letter buttons on presence of a resume and surfaces ai-no-resume state — matches 400 backend behavior."
+  ],
+  "updated_files": [
+    "/app/backend/tests/conftest.py (updated to use new tester@moneyseeker.app / Test1234! credentials from /app/memory/test_credentials.md)",
+    "/app/backend/tests/test_phase345.py (new — Phase 3/4/5 coverage)"
+  ],
+  "success_rate": {
+    "backend": "100% (12/12 phase3-5 cases)",
+    "frontend": "100% of tested flows (login, tracker kanban, sheet stage/reminder/notes, search + live sync, job detail AI match + cover letter)"
+  },
+  "seed_data_creation": "No new seed data. Reused tester@moneyseeker.app's existing default resume + tracked application. Test PATCH cycled status to Interviewing; test added and then deleted a note. State left: tester has 1 or more tracked applications (may be in Interviewing after this run) — E1 may want to reset to Applied for demo screenshots.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Backend tests: `cd /app/backend && pytest tests/ -v` — uses EXPO_PUBLIC_BACKEND_URL from frontend/.env fallback. Credentials: tester@moneyseeker.app / Test1234! (per /app/memory/test_credentials.md). Phase 3-5 focused suite is tests/test_phase345.py. Frontend: mobile viewport 390x844, login button label 'Continue', tab bar labels: Search/Tracker/Resumes/Profile (case-sensitive). Do NOT use get_by_text('Search') to navigate tabs — it may match job card text; instead use the search-input testID (default tab after login is Search), or nav via the tab bar button. Known non-blocking web issues: @gorhom/bottom-sheet TextInput dev overlay error, RN-web deprecation warnings, logo.clearbit.com blocked in sandbox.",
+  "rca_of_issue": "N/A — no functional bugs. The only new-in-this-iteration concern is the @gorhom/bottom-sheet BottomSheetTextInput dev-error surfaced on web when adding a note: root cause is a react-native-web version mismatch inside @gorhom/bottom-sheet's internal TextInput wrapper (it calls TextInputState.currentlyFocusedInput which no longer exists on RN-web). The user-facing operation still completes successfully — dev overlay only. Native builds are unaffected."
+}

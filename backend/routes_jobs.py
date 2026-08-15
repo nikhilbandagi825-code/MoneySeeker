@@ -1,6 +1,9 @@
-"""Job listings: create, search/filter, detail, and a sample seeder for testing."""
+"""Job listings: create, search/filter, detail, seeder, and live sync (Remotive)."""
+import html as html_lib
+import re
 from typing import List, Optional
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from auth import get_current_user
@@ -185,3 +188,93 @@ async def seed_jobs(user: User = Depends(get_current_user)):
         inserted += 1
     total = await db.jobs.count_documents({})
     return {"inserted": inserted, "total_jobs": total}
+
+
+# ---------- Phase 4: live jobs from Remotive (free, no API key) ----------
+def _infer_experience(title: str) -> str:
+    t = title.lower()
+    if "intern" in t:
+        return "intern"
+    if any(k in t for k in ("junior", "entry", "graduate", "jr.", "jr ")):
+        return "entry"
+    if any(k in t for k in ("lead", "principal", "staff", "head of", "manager", "director", "vp ")):
+        return "lead"
+    if any(k in t for k in ("senior", "sr.", "sr ")):
+        return "senior"
+    return "mid"
+
+
+def _parse_salary(text: str):
+    if not text:
+        return None, None
+    nums = [int(n.replace(",", "")) for n in re.findall(r"([\d][\d,]{3,})", text)]
+    nums = [n for n in nums if 10000 <= n <= 2000000]
+    if not nums:
+        return None, None
+    if len(nums) == 1:
+        return nums[0], None
+    return min(nums), max(nums)
+
+
+def _strip_html(raw: str) -> str:
+    text = re.sub(r"<(br|/p|/div|/li|/ul|/h[1-6])[^>]*>", "\n", raw, flags=re.I)
+    text = re.sub(r"<li[^>]*>", "- ", text, flags=re.I)
+    text = re.sub(r"<[^>]+>", "", text)
+    text = html_lib.unescape(text)
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
+
+
+@jobs_router.post("/sync")
+async def sync_live_jobs(
+    q: Optional[str] = Query(default=None),
+    limit: int = 30,
+    user: User = Depends(get_current_user),
+):
+    """Fetch live remote listings from Remotive and upsert into the jobs collection."""
+    params: dict = {"limit": min(limit, 50)}
+    if q:
+        params["search"] = q
+    try:
+        async with httpx.AsyncClient(timeout=20) as http:
+            resp = await http.get("https://remotive.com/api/remote-jobs", params=params)
+            resp.raise_for_status()
+            data = resp.json()
+    except Exception:  # noqa: BLE001
+        raise HTTPException(status_code=502, detail="Live job source unavailable")
+
+    synced = 0
+    for item in data.get("jobs", []):
+        external_id = str(item.get("id") or "")
+        title = (item.get("title") or "").strip()
+        company = (item.get("company_name") or "").strip()
+        if not external_id or not title or not company:
+            continue
+        exists = await db.jobs.find_one({"source": "remotive", "external_id": external_id})
+        if exists:
+            continue
+        salary_min, salary_max = _parse_salary(item.get("salary") or "")
+        tags = [t for t in (item.get("tags") or []) if t][:4]
+        if not tags and item.get("category"):
+            tags = [item["category"]]
+        job = Job(
+            title=title,
+            company=company,
+            company_logo=item.get("company_logo") or "",
+            location=item.get("candidate_required_location") or "Remote",
+            remote_type=RemoteType.remote,
+            salary_min=salary_min,
+            salary_max=salary_max,
+            experience_level=ExperienceLevel(_infer_experience(title)),
+            description=_strip_html(item.get("description") or "")[:6000],
+            tags=tags,
+            source="remotive",
+            external_id=external_id,
+            url=item.get("url") or "",
+        )
+        await db.jobs.insert_one(job.model_dump())
+        synced += 1
+
+    total = await db.jobs.count_documents({})
+    return {"synced": synced, "total_jobs": total}

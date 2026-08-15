@@ -84,15 +84,10 @@ async def update_application(
     if not doc:
         raise HTTPException(status_code=404, detail="Application not found")
 
-    updates: dict = {}
-    if payload.status is not None:
-        updates["status"] = payload.status.value
-    if payload.resume_id is not None:
-        updates["resume_id"] = payload.resume_id
-    if payload.follow_up_date is not None:
-        updates["follow_up_date"] = payload.follow_up_date
-    if payload.order is not None:
-        updates["order"] = payload.order
+    # exclude_unset lets clients clear nullable fields (e.g. follow_up_date: null)
+    updates: dict = payload.model_dump(exclude_unset=True, mode="json")
+    if updates.get("status") is None:
+        updates.pop("status", None)
     updates["updated_at"] = now_iso()
 
     await db.applications.update_one(

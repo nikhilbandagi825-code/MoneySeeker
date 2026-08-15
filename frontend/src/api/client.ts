@@ -95,6 +95,13 @@ export interface Resume {
   updated_at: string;
 }
 
+export interface MatchResult {
+  score: number;
+  summary: string;
+  strengths: string[];
+  gaps: string[];
+}
+
 export interface AuthResponse {
   session_token: string;
   user: User;
@@ -141,6 +148,11 @@ export const api = {
   },
   getJob: (id: string) => request<Job>(`/jobs/${id}`),
   seedJobs: () => request<{ inserted: number; total_jobs: number }>("/jobs/seed", { method: "POST" }),
+  syncJobs: (q?: string) =>
+    request<{ synced: number; total_jobs: number }>(
+      `/jobs/sync${q ? `?q=${encodeURIComponent(q)}` : ""}`,
+      { method: "POST" },
+    ),
 
   // applications
   listApplications: (status?: string) =>
@@ -178,4 +190,16 @@ export const api = {
   ) => request<Resume>(`/resumes/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
   deleteResume: (id: string) =>
     request<{ success: boolean }>(`/resumes/${id}`, { method: "DELETE" }),
+
+  // ai
+  aiMatch: (job_id: string, resume_id?: string | null) =>
+    request<MatchResult>("/ai/match", {
+      method: "POST",
+      body: JSON.stringify({ job_id, resume_id }),
+    }),
+  aiCoverLetter: (job_id: string, resume_id?: string | null) =>
+    request<{ cover_letter: string }>("/ai/cover-letter", {
+      method: "POST",
+      body: JSON.stringify({ job_id, resume_id }),
+    }),
 };

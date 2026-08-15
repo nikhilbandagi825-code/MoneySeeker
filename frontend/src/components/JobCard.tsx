@@ -67,6 +67,12 @@ export function JobCard({
       </View>
 
       <View style={styles.tagRow}>
+        {job.source === "remotive" && (
+          <View style={styles.livePill}>
+            <View style={styles.liveDot} />
+            <Text style={styles.livePillText}>LIVE</Text>
+          </View>
+        )}
         <View style={styles.remotePill}>
           <Text style={styles.remotePillText}>{REMOTE_LABEL[job.remote_type]}</Text>
         </View>
@@ -113,4 +119,15 @@ const styles = StyleSheet.create({
   remotePillText: { fontFamily: fonts.medium, fontSize: fontSize.sm, color: colors.onBrandSecondary },
   tag: { backgroundColor: colors.surfaceSecondary, paddingHorizontal: spacing.md, paddingVertical: 5, borderRadius: radius.sm },
   tagText: { fontFamily: fonts.regular, fontSize: fontSize.sm, color: colors.onSurfaceSecondary },
+  livePill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: "#DDEEE1",
+    paddingHorizontal: spacing.md,
+    paddingVertical: 5,
+    borderRadius: radius.sm,
+  },
+  liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.success },
+  livePillText: { fontFamily: fonts.semibold, fontSize: 11, color: "#2C4533", letterSpacing: 0.5 },
 });
