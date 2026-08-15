@@ -44,14 +44,17 @@ Delivered in phases:
 - Applications: POST/GET /api/applications (?status), GET/PATCH/DELETE /api/applications/{id},
   POST /api/applications/{id}/notes, DELETE /api/applications/{id}/notes/{note_id}
 
-## Implemented (2026-08-15)
-- [x] P1: Data model, email+google auth, full CRUD for jobs/resumes/applications, sample seeder
+## Implemented
+- [x] P1 (2026-08-15): Data model, email+google auth, full CRUD for jobs/resumes/applications, sample seeder
+- [x] P2 (2026-08-15): Full frontend — auth screen (email + Google), bottom-tab nav (Search/Tracker/Resumes/Profile),
+  job search (search bar, quick pills, filter bottom sheet, results list), job detail (Save/Apply, sticky glass CTA),
+  functional tracker (status-segmented), resumes (add/list/default/delete), profile (stats + logout).
+  Design system: Geist font, warm sand + sage green, testIDs everywhere. All tests green (backend 19/19, frontend 17/17).
 
 ## Backlog
-- P2 (next): Job search UI + detail screen (Save/Apply)
-- P3: Kanban tracker with drag-and-drop, notes, follow-up date picker
-- P4: Apify integration + field mapping
-- P5: AI resume match score + cover letter generator
+- P3 (next): Kanban tracker upgrade — drag cards between columns, add notes UI, follow-up reminder date picker per application
+- P4: Apify job-scraper integration (user provides Apify token) + map response → Job model
+- P5: AI resume match score (0-100 + gaps) + tailored cover letter generation (Claude Sonnet 5 / GPT-5.4)
 
 ## Test Accounts
 See /app/memory/test_credentials.md

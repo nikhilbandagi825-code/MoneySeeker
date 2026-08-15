@@ -1,14 +1,20 @@
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { Stack } from "expo-router";
+import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { LogBox } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { KeyboardProvider } from "react-native-keyboard-controller";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { AuthProvider } from "@/src/context/AuthContext";
+import { ToastProvider } from "@/src/components/ui";
 import { useIconFonts } from "@/src/hooks/use-icon-fonts";
-
 
 // Disable logbox errors etc so that users can see the app
 // and agent works as expected.
-LogBox.ignoreAllLogs(true)
+LogBox.ignoreAllLogs(true);
 
 // Keep the native splash visible from cold start until icon fonts register.
 // Required because @expo/vector-icons' componentDidMount fallback fires
@@ -17,17 +23,40 @@ LogBox.ignoreAllLogs(true)
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [loaded, error] = useIconFonts();
+  const [iconsLoaded, iconsError] = useIconFonts();
+  const [geistLoaded] = useFonts({
+    "Geist-Regular": require("../assets/fonts/Geist-Regular.ttf"),
+    "Geist-Medium": require("../assets/fonts/Geist-Medium.ttf"),
+    "Geist-SemiBold": require("../assets/fonts/Geist-SemiBold.ttf"),
+    "Geist-Bold": require("../assets/fonts/Geist-Bold.ttf"),
+  });
+
+  const ready = (iconsLoaded || iconsError) && geistLoaded;
 
   useEffect(() => {
-    if (loaded || error) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded, error]);
+    if (ready) SplashScreen.hideAsync();
+  }, [ready]);
 
-  // If the CDN is unreachable we fall through on error rather than wedging
-  // the app — icons will tofu, but the app still boots.
-  if (!loaded && !error) return null;
+  if (!ready) return null;
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <KeyboardProvider>
+        <SafeAreaProvider>
+          <BottomSheetModalProvider>
+            <ToastProvider>
+              <AuthProvider>
+                <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "#FCFCFA" } }}>
+                  <Stack.Screen name="index" />
+                  <Stack.Screen name="login" />
+                  <Stack.Screen name="(tabs)" />
+                  <Stack.Screen name="job/[id]" options={{ presentation: "card" }} />
+                </Stack>
+              </AuthProvider>
+            </ToastProvider>
+          </BottomSheetModalProvider>
+        </SafeAreaProvider>
+      </KeyboardProvider>
+    </GestureHandlerRootView>
+  );
 }

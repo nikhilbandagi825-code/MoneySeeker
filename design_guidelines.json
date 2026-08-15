@@ -1,0 +1,198 @@
+{
+  "app_name": "MoneySeeker",
+  "personality": "1 iOS-Native Clean",
+  "personality_one_liner": "A calm, hyper-functional workspace where tracking your career feels as natural and seamless as checking your messages.",
+  "color": {
+    "surface": "#FCFCFA",
+    "onSurface": "#1A1C1A",
+    "surfaceSecondary": "#F3F3EF",
+    "onSurfaceSecondary": "#4A4C4A",
+    "surfaceTertiary": "#EAEAE5",
+    "onSurfaceTertiary": "#727472",
+    "surfaceInverse": "#1A1C1A",
+    "onSurfaceInverse": "#FCFCFA",
+    "brand": "#5A8265",
+    "brandPrimary": "#5A8265",
+    "onBrandPrimary": "#FFFFFF",
+    "brandSecondary": "#E5EDE7",
+    "onBrandSecondary": "#2C4533",
+    "brandTertiary": "#F2F7F4",
+    "onBrandTertiary": "#42614B",
+    "success": "#4D7858",
+    "onSuccess": "#FFFFFF",
+    "warning": "#C48A31",
+    "onWarning": "#FFFFFF",
+    "error": "#B84B4B",
+    "onError": "#FFFFFF",
+    "info": "#4A6C7C",
+    "onInfo": "#FFFFFF",
+    "border": "#E1E1DA",
+    "borderStrong": "#C2C2BA",
+    "divider": "#EBEBE4",
+    
+    "dark_surface": "#141514",
+    "dark_onSurface": "#F5F5F3",
+    "dark_surfaceSecondary": "#202220",
+    "dark_onSurfaceSecondary": "#A5A7A5",
+    "dark_surfaceTertiary": "#2E302E",
+    "dark_onSurfaceTertiary": "#868886",
+    "dark_surfaceInverse": "#FCFCFA",
+    "dark_onSurfaceInverse": "#141514",
+    "dark_brandPrimary": "#75A382",
+    "dark_onBrandPrimary": "#0F1A12",
+    "dark_border": "#2E302E",
+    "dark_borderStrong": "#4A4C4A",
+    "dark_divider": "#252725"
+  },
+  "typography": {
+    "displayFontFamily": "Geist",
+    "textFontFamily": "Geist",
+    "scale": {
+      "sm": 12,
+      "base": 14,
+      "lg": 16,
+      "xl": 20,
+      "2xl": 24
+    }
+  },
+  "spacing": {
+    "rule": "Generous vertical breathing room. Cards and input fields must use safe spacing (minimum md inside, lg between) so the layout never feels cramped.",
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "2xl": 32,
+    "3xl": 48
+  },
+  "radius_tokens": {
+    "sm": 6,
+    "md": 12,
+    "lg": 20,
+    "pill": 999
+  },
+  "shadow_tier": 1,
+  "navigation": "bottom_tabs",
+  "icon_set": "Phosphor",
+  "glassmorphism": {
+    "enabled": true,
+    "do's": [
+      "Use on the bottom tab bar.",
+      "Use on the sticky headers over scrolling content (e.g., Tracker tabs, Search header).",
+      "Use on the bottom-sheet drag handles and headers."
+    ],
+    "dont's": [
+      "Never use on job cards.",
+      "Never use on form fields.",
+      "Avoid stacking more than two glass surfaces."
+    ]
+  },
+  "platform_libraries": {
+    "glass": {
+      "ios": "expo-glass-effect",
+      "android": "expo-blur",
+      "low_end_android_fallback": "solid surfaceSecondary"
+    },
+    "image": "expo-image",
+    "blur": "expo-blur",
+    "bottom_sheet": "@gorhom/bottom-sheet",
+    "animation": "react-native-reanimated",
+    "gesture": "react-native-gesture-handler"
+  },
+  "screens": [
+    {
+      "name": "Auth",
+      "purpose": "A calm, frictionless entry point into the workspace.",
+      "states": {
+        "loading": "Subtle pulsing brand logo in center.",
+        "empty": "N/A",
+        "error": "Standard error toast with retry on network failure."
+      },
+      "layout": "Minimalist layout. Logo mark centered top. Below, a clean email input stack and primary Continue button. Below that, a subtle 'Continue with Google' button using the real Google logo PNG. Background should use the minimalist warm sand texture image with a heavy, light-tinted scrim over it to preserve readability."
+    },
+    {
+      "name": "Job Search (Home)",
+      "purpose": "Primary discovery surface combining immediate search intent with browsing capabilities.",
+      "states": {
+        "loading": "Skeleton UI for stacked cards.",
+        "empty": "Illustration of a magnifying glass + 'No jobs match your criteria' + 'Clear Filters' CTA.",
+        "error": "Error message with 'Tap to retry' CTA."
+      },
+      "layout": "Header features a large search input field (surfaceTertiary) and a glass filter button next to it. Below header, a horizontally scrolling carousel of quick filter pills (Remote, Design, $100k+). The main body is a stacked vertical list of Job Cards. Cards must have generous padding, utilizing real company logo PNGs, job title, metadata tags (location, salary), and a right-aligned subtle bookmark icon."
+    },
+    {
+      "name": "Filter Bottom Sheet",
+      "purpose": "Deep filtering controls that stay contextually tied to the search screen.",
+      "states": {
+        "loading": "N/A",
+        "empty": "N/A",
+        "error": "N/A"
+      },
+      "layout": "Invoked from the search screen. Glass header with drag handle. Scrollable content containing segmented controls for Role, Location, and toggle switches for Remote/Onsite. A two-handle slider for Salary Range. A sticky primary CTA ('Show 142 Jobs') anchored to the bottom."
+    },
+    {
+      "name": "Job Detail",
+      "purpose": "In-depth review of a job listing focusing on readability, ending with clear action steps.",
+      "states": {
+        "loading": "Skeleton blocks matching text structure.",
+        "empty": "N/A",
+        "error": "Readable network error with retry button."
+      },
+      "layout": "Full-screen view. The hero features the company's real logo layered slightly over a blurred background tint derived from the logo color. Clean typography layout for the Job Description using the rich text/markdown. A sticky container at the bottom root (using glassmorphism) houses two CTAs side-by-side: a secondary 'Save to Tracker' button and a primary 'Apply' button."
+    },
+    {
+      "name": "Application Tracker",
+      "purpose": "A mobile-optimized Kanban board allowing quick status overview and progression.",
+      "states": {
+        "loading": "Skeleton view of list cards.",
+        "empty": "Illustration of an empty folder + 'You haven't tracked any applications yet' + 'Find Jobs' primary CTA.",
+        "error": "Readable error message + retry."
+      },
+      "layout": "Instead of a cramped multi-column kanban, use a horizontal pager (tab view) grouped by status: 'Saved', 'Applied', 'Interviewing', 'Offer', 'Rejected'. The active tab is indicated by a segmented control rail sticky at the top. The body is a vertical scroll of application cards under that specific status. Cards show company logo, job title, date applied, and a visual reminder pill. Tapping a card opens a modal to move stages or add notes."
+    }
+  ],
+  "images": {
+    "google_logo": {
+      "url": "https://images.unsplash.com/photo-1662947190722-5d272f82a526?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MTJ8MHwxfHNlYXJjaHwxfHxnb29nbGUlMjBsb2dvJTIwcG5nJTIwdHJhbnNwYXJlbnR8ZW58MHx8fHwxNzg2ODAyNzU1fDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Google logo transparent"
+    },
+    "apple_logo": {
+      "url": "https://images.unsplash.com/photo-1621768216002-5ac171876625?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzZ8MHwxfHNlYXJjaHwxfHxhcHBsZSUyMGNvbXBhbnklMjBsb2dvJTIwdHJhbnNwYXJlbnR8ZW58MHx8fHwxNzg2ODAyNzYxfDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Apple company logo"
+    },
+    "amazon_logo": {
+      "url": "https://images.pexels.com/photos/4560039/pexels-photo-4560039.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "alt": "Amazon logo on phone"
+    },
+    "spotify_logo": {
+      "url": "https://images.unsplash.com/photo-1658489958427-325ded050829?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1MDZ8MHwxfHNlYXJjaHwxfHxzcG90aWZ5JTIwbG9nbyUyMHRyYW5zcGFyZW50fGVufDB8fHx8MTc4NjgwMjc2MXww&ixlib=rb-4.1.0&q=85",
+      "alt": "Spotify logo transparent"
+    },
+    "auth_background": {
+      "url": "https://images.unsplash.com/photo-1619732426274-4c7a677cd6af?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTZ8MHwxfHNlYXJjaHwxfHxtaW5pbWFsaXN0JTIwd2FybSUyMHNhbmQlMjB0ZXh0dXJlJTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3ODY4MDI3NTZ8MA&ixlib=rb-4.1.0&q=85",
+      "dark": "https://images.unsplash.com/photo-1585314062340-f1a5a7c9328d?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1OTV8MHwxfHNlYXJjaHwxfHxtaW5pbWFsJTIwYWJzdHJhY3QlMjBkYXJrJTIwc2xhdGUlMjB0ZXh0dXJlJTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3ODY4MDI3NTZ8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Minimalist texture background for authentication"
+    },
+    "plant_leaf_accent": {
+      "url": "https://images.unsplash.com/photo-1533038590840-1cde6e668a91?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwxfHxwbGFudCUyMGxlYWYlMjBtaW5pbWFsJTIwaXNvbGF0ZWQlMjB0cmFuc3BhcmVudHxlbnwwfHx8fDE3ODY4MDI3NTZ8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Minimal plant leaf accent for empty states"
+    }
+  },
+  "haptics": {
+    "tab_press": "light",
+    "button_primary_press": "medium",
+    "button_secondary_press": "light",
+    "job_save_toggle": "success",
+    "kanban_stage_move": "success",
+    "filter_sheet_open": "light"
+  },
+  "instructions_to_main_agent": [
+    "Follow '1 iOS-Native Clean' personality guidelines. Strict adherence to generous spacing (md/lg inside and between cards) to maintain a premium feel.",
+    "Do NOT use any blue, indigo, or purple hues. The palette is strict: warm stone/sand base with Sage Green as the only accent color. All text should use near-black or dark gray.",
+    "Implement horizontal pager (swipeable views) for the Kanban tracker instead of vertical stacking or tiny dense columns. A segmented control should govern the active Kanban stage (Saved, Applied, Interviewing, Offer, Rejected).",
+    "Ensure 'Job Detail' and 'Filter Bottom Sheet' have sticky CTA containers at the bottom. Use expo-blur for these sticky bottom containers.",
+    "Whenever a list contains jobs, utilize real fetched company logo PNGs instead of fallback avatars or icons. I have provided sample Apple, Amazon, and Spotify images to use in the mock data.",
+    "All full-screen background images (like on the Auth screen) MUST feature a top-to-bottom three-stop linear gradient scrim to ensure text readability.",
+    "Avoid thick borders, heavy shadows, and completely centered pure-white layouts. Ensure the app looks highly functional but organic."
+  ]
+}

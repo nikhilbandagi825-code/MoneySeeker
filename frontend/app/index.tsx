@@ -1,30 +1,25 @@
-import { Text, View, StyleSheet, Image } from "react-native";
+import { Redirect } from "expo-router";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
-const EXPO_PUBLIC_BACKEND_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
+import { useAuth } from "@/src/context/AuthContext";
+import { colors, fonts, fontSize } from "@/src/theme";
 
 export default function Index() {
-  console.log(EXPO_PUBLIC_BACKEND_URL, "EXPO_PUBLIC_BACKEND_URL");
+  const { user, loading } = useAuth();
 
-  return (
-    <View style={styles.container}>
-      <Image
-        source={require("../assets/images/app-image.png")}
-        style={styles.image}
-      />
-    </View>
-  );
+  if (loading) {
+    return (
+      <View style={styles.container} testID="splash-screen">
+        <Text style={styles.logo}>MoneySeeker</Text>
+        <ActivityIndicator color={colors.brandPrimary} style={{ marginTop: 16 }} />
+      </View>
+    );
+  }
+
+  return <Redirect href={user ? "/(tabs)/search" : "/login"} />;
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0c0c0c",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "contain",
-  },
+  container: { flex: 1, backgroundColor: colors.surface, alignItems: "center", justifyContent: "center" },
+  logo: { fontFamily: fonts.bold, fontSize: fontSize.xxl, color: colors.brandPrimary, letterSpacing: -0.5 },
 });
